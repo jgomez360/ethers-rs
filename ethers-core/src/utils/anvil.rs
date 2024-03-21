@@ -59,7 +59,11 @@ impl AnvilInstance {
 
 impl Drop for AnvilInstance {
     fn drop(&mut self) {
-        self.pid.kill().expect("could not kill anvil");
+        let mut kill = Command::new("kill")
+            .args(["-s", "SIGINT", &self.pid.id().to_string()])
+            .spawn()
+            .unwrap();
+        kill.wait().expect("could not kill anvil");
     }
 }
 
@@ -256,8 +260,8 @@ impl Anvil {
         let mut is_private_key = false;
         let mut chain_id = None;
         loop {
-            if start + Duration::from_millis(self.timeout.unwrap_or(ANVIL_STARTUP_TIMEOUT_MILLIS)) <=
-                Instant::now()
+            if start + Duration::from_millis(self.timeout.unwrap_or(ANVIL_STARTUP_TIMEOUT_MILLIS))
+                <= Instant::now()
             {
                 panic!("Timed out waiting for anvil to start. Is anvil installed?")
             }
@@ -265,7 +269,7 @@ impl Anvil {
             let mut line = String::new();
             reader.read_line(&mut line).expect("Failed to read line from anvil process");
             if line.contains("Listening on") {
-                break
+                break;
             }
 
             if line.starts_with("Private Keys") {
