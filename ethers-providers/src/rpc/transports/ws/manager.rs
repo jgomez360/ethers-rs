@@ -441,7 +441,7 @@ impl RequestManager {
 
         // Ordering matters here. We want this block above the unbounded send,
         // and after the serialization
-        if in_flight.method == "eth_subscribe" {
+        if in_flight.method == "eth_subscribe" || in_flight.method == "bpcr_subscribe" {
             self.subs.service_subscription_request(id, in_flight.params.clone())?;
         }
 
